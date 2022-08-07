@@ -4,7 +4,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     cmake \
     clang-12 \
     lldb-12 \
-    lld-12 \
+    gdb \
     ninja-build \
     libeigen3-dev \
     freeglut3-dev \
