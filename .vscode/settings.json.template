@@ -1,0 +1,6 @@
+{
+    "cmake.debugConfig": {
+        "MIMode": "gdb",
+        "miDebuggerPath": "/usr/bin/gdb"
+      },
+}
