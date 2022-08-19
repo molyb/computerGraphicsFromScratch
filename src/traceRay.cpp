@@ -5,6 +5,11 @@ TraceRay::TraceRay() {
     spheres_.push_back(std::make_shared<Sphere>(1, cv::Vec3d(0, -1, 3), cv::Vec3b(255, 0, 0)));  // red
     spheres_.push_back(std::make_shared<Sphere>(1., cv::Vec3d(2, 0, 4), cv::Vec3b(0, 0, 255)));  // blue
     spheres_.push_back(std::make_shared<Sphere>(1., cv::Vec3d(-2, 0, 4), cv::Vec3b(0, 255, 0)));  // green
+    spheres_.push_back(std::make_shared<Sphere>(5000., cv::Vec3d(0, -5001, 0), cv::Vec3b(255, 255, 0)));  // yellow
+
+    lights_.push_back(std::make_shared<Light>(0.2));  // Light::Type::ambient
+    lights_.push_back(std::make_shared<Light>(Light::Type::point, 0.6, cv::Vec3d(2, 1, 0)));
+    lights_.push_back(std::make_shared<Light>(Light::Type::directional, 0.2, cv::Vec3d(1, 4, 4)));
 
     backGroundColor_ = cv::Vec3b(255, 255, 255); // white
 }
@@ -49,5 +54,32 @@ cv::Vec3b TraceRay::compute(const cv::Vec3d& O, const cv::Vec3d& D, double t_min
     if (closest_sphere == nullptr) {
         return backGroundColor_;
     }
-    return closest_sphere->color;
+
+    cv::Vec3d P = O + closest_t * D;
+    cv::Vec3d N = P - closest_sphere->center;
+    N = N / cv::norm(N);
+    return closest_sphere->color * computeLighting(P, N);
+}
+
+
+double TraceRay::computeLighting(const cv::Vec3d &P, const cv::Vec3d &N) {
+    double i = 0.0;
+
+    for (const std::shared_ptr<Light>& light : lights_) {
+        if (light->type == Light::Type::ambient) {
+            i += light->intensity;
+        } else {
+            cv::Vec3d L = 0.;
+            if (light->type == Light::Type::point) {
+                L = light->position - P;
+            } else {
+                L = light->direction;
+            }
+            double nDotI = N.dot(L);
+            if (nDotI > 0) {
+                i += light->intensity * nDotI/(cv::norm(N) * cv::norm(L));
+            }
+        }
+    }
+    return i;
 }
