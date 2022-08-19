@@ -9,7 +9,7 @@ public:
     Canvas(size_t canvasWidth, size_t canvasHeight,
            double viewportWidth = 1., double viewportHeight = 1., double viewportDepth = 1.);
 
-    bool putPixel(int x, int y, const cv::Vec3b& color);
+    bool putPixel(int x, int y, const cv::Vec3b& colorRGB);
 
     cv::Vec3d toViewport(int x, int y) const;
 

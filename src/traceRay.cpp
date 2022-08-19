@@ -2,8 +2,8 @@
 
 
 TraceRay::TraceRay() {
-    spheres_.push_back(std::make_shared<Sphere>(1, cv::Vec3d(0, -1, 3), cv::Vec3b(0, 0, 255)));  // red
-    spheres_.push_back(std::make_shared<Sphere>(1., cv::Vec3d(2, 0, 4), cv::Vec3b(255, 0, 0)));  // blue
+    spheres_.push_back(std::make_shared<Sphere>(1, cv::Vec3d(0, -1, 3), cv::Vec3b(255, 0, 0)));  // red
+    spheres_.push_back(std::make_shared<Sphere>(1., cv::Vec3d(2, 0, 4), cv::Vec3b(0, 0, 255)));  // blue
     spheres_.push_back(std::make_shared<Sphere>(1., cv::Vec3d(-2, 0, 4), cv::Vec3b(0, 255, 0)));  // green
 
     backGroundColor_ = cv::Vec3b(255, 255, 255); // white
