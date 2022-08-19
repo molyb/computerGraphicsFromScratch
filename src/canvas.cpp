@@ -13,7 +13,7 @@ Canvas::Canvas(size_t canvasWidth, size_t canvasHeight,
 }
 
 
-bool Canvas::putPixel(int x, int y, const cv::Vec3b& color) {
+bool Canvas::putPixel(int x, int y, const cv::Vec3b& colorRGB) {
     if (image_.empty()) {
         return false;
     }
@@ -22,7 +22,7 @@ bool Canvas::putPixel(int x, int y, const cv::Vec3b& color) {
     if (u < 0 || v < 0 || canvasWidth_ <= u || canvasHeight_ <= v) {
         return false;
     }
-    image_.at<cv::Vec3b>(v, u) = color;
+    image_.at<cv::Vec3b>(v, u) = cv::Vec3b(colorRGB(2), colorRGB(1), colorRGB(0));  // RGB -> BGR(OpenCV)
     return true;
 }
 
