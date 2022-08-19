@@ -2,24 +2,9 @@
 
 
 TraceRay::TraceRay() {
-    std::shared_ptr<Sphere> red = std::make_shared<Sphere>();
-    red->radius = 1.;
-    red->center = cv::Vec3d(0, -1, 3);
-    red->color = cv::Vec3b(0, 0, 255);
-
-    std::shared_ptr<Sphere> blue = std::make_shared<Sphere>();;
-    blue->radius = 1.;
-    blue->center = cv::Vec3d(2, 0, 4);
-    blue->color = cv::Vec3b(255, 0, 0);
-
-    std::shared_ptr<Sphere> green = std::make_shared<Sphere>();;
-    green->radius = 1.;
-    green->center = cv::Vec3d(-2, 0, 4);
-    green->color = cv::Vec3b(0, 255, 0);
-
-    spheres_.push_back(red);
-    spheres_.push_back(blue);
-    spheres_.push_back(green);
+    spheres_.push_back(std::make_shared<Sphere>(1, cv::Vec3d(0, -1, 3), cv::Vec3b(0, 0, 255)));  // red
+    spheres_.push_back(std::make_shared<Sphere>(1., cv::Vec3d(2, 0, 4), cv::Vec3b(255, 0, 0)));  // blue
+    spheres_.push_back(std::make_shared<Sphere>(1., cv::Vec3d(-2, 0, 4), cv::Vec3b(0, 255, 0)));  // green
 
     backGroundColor_ = cv::Vec3b(255, 255, 255); // white
 }
