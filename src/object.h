@@ -36,10 +36,11 @@ struct Sphere {
     double radius;
     cv::Vec3d center;
     cv::Vec3b color;
+    double specular;
 
-    Sphere(double radius, const cv::Vec3d& center, const cv::Vec3b& colorRGB) :
-        radius(radius), center(center), color(colorRGB) {
-    }
+    Sphere(double radius, const cv::Vec3d& center, const cv::Vec3b& colorRGB, double specular) :
+        radius(radius), center(center), color(colorRGB), specular(specular) {
+    };
 };
 
 #endif //COMPUTERGRAPHICSFROMSCRATCH_OBJECT_H
