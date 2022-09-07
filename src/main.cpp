@@ -1,6 +1,21 @@
 #include "canvas.h"
 #include "traceRay.h"
 
+std::shared_ptr<Scene> makeScene() {
+    std::shared_ptr<Scene> scene = std::make_shared<Scene>();
+
+    scene->spheres.emplace_back(std::make_shared<Sphere>(1, cv::Vec3d(0, -1, 3), cv::Vec3b(255, 0, 0), 500));  // red
+    scene->spheres.emplace_back(std::make_shared<Sphere>(1., cv::Vec3d(2, 0, 4), cv::Vec3b(0, 0, 255), 500));  // blue
+    scene->spheres.emplace_back(std::make_shared<Sphere>(1., cv::Vec3d(-2, 0, 4), cv::Vec3b(0, 255, 0), 10));  // green
+    scene->spheres.emplace_back(std::make_shared<Sphere>(5000., cv::Vec3d(0, -5001, 0), cv::Vec3b(255, 255, 0), 1000));  // yellow
+
+    scene->lights.emplace_back(std::make_shared<Light>(0.2));  // Light::Type::ambient
+    scene->lights.emplace_back(std::make_shared<Light>(Light::Type::point, 0.6, cv::Vec3d(2, 1, 0)));
+    scene->lights.emplace_back(std::make_shared<Light>(Light::Type::directional, 0.2, cv::Vec3d(1, 4, 4)));
+
+    return scene;
+}
+
 
 int main(int argc, char** argv) {
     const int canvasWidth = 400;
@@ -10,7 +25,7 @@ int main(int argc, char** argv) {
     const double viewportDepth = 1.;
 
     Canvas canvas(canvasWidth, canvasHeight, viewportWidth, viewportHeight, viewportDepth);
-    TraceRay trace;
+    TraceRay trace(makeScene());
     for (int x = -canvasWidth / 2; x < canvasWidth / 2; x++) {
         for (int y = -canvasHeight / 2; y < canvasHeight / 2; y++) {
             cv::Vec3d D = canvas.toViewport(x, y);

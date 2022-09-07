@@ -1,16 +1,7 @@
 #include "traceRay.h"
 
 
-TraceRay::TraceRay() {
-    spheres_.push_back(std::make_shared<Sphere>(1, cv::Vec3d(0, -1, 3), cv::Vec3b(255, 0, 0), 500));  // red
-    spheres_.push_back(std::make_shared<Sphere>(1., cv::Vec3d(2, 0, 4), cv::Vec3b(0, 0, 255), 500));  // blue
-    spheres_.push_back(std::make_shared<Sphere>(1., cv::Vec3d(-2, 0, 4), cv::Vec3b(0, 255, 0), 10));  // green
-    spheres_.push_back(std::make_shared<Sphere>(5000., cv::Vec3d(0, -5001, 0), cv::Vec3b(255, 255, 0), 1000));  // yellow
-
-    lights_.push_back(std::make_shared<Light>(0.2));  // Light::Type::ambient
-    lights_.push_back(std::make_shared<Light>(Light::Type::point, 0.6, cv::Vec3d(2, 1, 0)));
-    lights_.push_back(std::make_shared<Light>(Light::Type::directional, 0.2, cv::Vec3d(1, 4, 4)));
-
+TraceRay::TraceRay(std::shared_ptr<Scene> scene) : scene_(std::move(scene)) {
     backGroundColor_ = cv::Vec3b(255, 255, 255); // white
 }
 
@@ -34,23 +25,32 @@ cv::Vec2d TraceRay::intersectRaySphere(const cv::Vec3d& O, const cv::Vec3d& D, c
 }
 
 
-cv::Vec3b TraceRay::compute(const cv::Vec3d& O, const cv::Vec3d& D, double t_min, double t_max) {
+std::pair<std::shared_ptr<Sphere>, double>
+TraceRay::closestIntersection(const cv::Vec3d &O, const cv::Vec3d &D, double t_min, double t_max) {
     double closest_t = std::numeric_limits<double>::infinity();
     std::shared_ptr<Sphere> closest_sphere = nullptr;
-
-    for (const std::shared_ptr<Sphere>& sphere : spheres_) {
+    for (const std::shared_ptr<Sphere>& sphere : scene_->spheres) {
         cv::Vec2d t = intersectRaySphere(O, D, *sphere);
-        double t1 = t(0);
-        double t2 = t(1);
+        double t1 = t[0];
         if (t_min <= t1 && t1 <= t_max && t1 < closest_t) {
             closest_t = t1;
             closest_sphere = sphere;
         }
+        double t2 = t[1];
         if (t_min <= t2 && t2 <= t_max && t2 < closest_t) {
             closest_t = t2;
             closest_sphere = sphere;
         }
     }
+    return {closest_sphere, closest_t};
+}
+
+
+cv::Vec3b TraceRay::compute(const cv::Vec3d& O, const cv::Vec3d& D, double t_min, double t_max) {
+    std::pair<std::shared_ptr<Sphere>, double> intersection = closestIntersection(O, D, t_min, t_max);
+    std::shared_ptr<Sphere> closest_sphere = intersection.first;
+    double closest_t = intersection.second;
+
     if (closest_sphere == nullptr) {
         return backGroundColor_;
     }
@@ -65,16 +65,27 @@ cv::Vec3b TraceRay::compute(const cv::Vec3d& O, const cv::Vec3d& D, double t_min
 double TraceRay::computeLighting(const cv::Vec3d& P, const cv::Vec3d& N, const cv::Vec3d& V, double s) {
     double i = 0.0;
 
-    for (const std::shared_ptr<Light>& light : lights_) {
+    for (const std::shared_ptr<Light>& light : scene_->lights) {
         if (light->type == Light::Type::ambient) {
             i += light->intensity;
         } else {
+            double t_max = std::numeric_limits<double>::infinity();
             cv::Vec3d L = 0.;
             if (light->type == Light::Type::point) {
                 L = light->position - P;
+                t_max = 1.;
             } else {
                 L = light->direction;
+                t_max = std::numeric_limits<double>::infinity();
             }
+
+            // shadow check
+            std::pair<std::shared_ptr<Sphere>, double> shadow = closestIntersection(P, L, 0.01, t_max);
+            std::shared_ptr<Sphere> shadow_sphere = shadow.first;
+            if (shadow_sphere != nullptr) {
+                continue;
+            }
+
             // Diffuse
             double nDotI = N.dot(L);
             if (nDotI > 0) {

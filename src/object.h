@@ -43,4 +43,9 @@ struct Sphere {
     };
 };
 
+struct Scene {
+    std::vector<std::shared_ptr<Light>> lights;
+    std::vector<std::shared_ptr<Sphere>> spheres;
+};
+
 #endif //COMPUTERGRAPHICSFROMSCRATCH_OBJECT_H
