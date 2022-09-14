@@ -46,7 +46,8 @@ TraceRay::closestIntersection(const cv::Vec3d &O, const cv::Vec3d &D, double t_m
 }
 
 
-cv::Vec3b TraceRay::compute(const cv::Vec3d& O, const cv::Vec3d& D, double t_min, double t_max) {
+cv::Vec3d TraceRay::compute(
+        const cv::Vec3d& O, const cv::Vec3d& D, double t_min, double t_max, size_t recursion_depth) {
     std::pair<std::shared_ptr<Sphere>, double> intersection = closestIntersection(O, D, t_min, t_max);
     std::shared_ptr<Sphere> closest_sphere = intersection.first;
     double closest_t = intersection.second;
@@ -58,7 +59,15 @@ cv::Vec3b TraceRay::compute(const cv::Vec3d& O, const cv::Vec3d& D, double t_min
     cv::Vec3d P = O + closest_t * D;
     cv::Vec3d N = P - closest_sphere->center;
     N = N / cv::norm(N);
-    return closest_sphere->color * computeLighting(P, N, -D, closest_sphere->specular);
+    cv::Vec3d local_color = closest_sphere->color * computeLighting(P, N, -D, closest_sphere->specular);
+
+    double r = closest_sphere->reflective;
+    if (recursion_depth <= 0 || r <= 0) {
+        return local_color;
+    }
+    cv::Vec3d R = reflectRay(-D, N);
+    cv::Vec3d reflected_color = compute(P, R, 0.001, std::numeric_limits<double>::infinity(), recursion_depth - 1);
+    return local_color * (1 - r) + reflected_color * r;
 }
 
 
@@ -103,4 +112,12 @@ double TraceRay::computeLighting(const cv::Vec3d& P, const cv::Vec3d& N, const c
         }
     }
     return i;
+}
+
+cv::Vec3d TraceRay::reflectRay(const cv::Vec3d &R, const cv::Vec3d &N) {
+    return 2 * N * N.dot(R) - R;
+}
+
+void TraceRay::setBackgroundColor(const cv::Vec3b& color) {
+    backGroundColor_ = color;
 }

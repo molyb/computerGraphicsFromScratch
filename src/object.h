@@ -37,9 +37,10 @@ struct Sphere {
     cv::Vec3d center;
     cv::Vec3b color;
     double specular;
+    double reflective;
 
-    Sphere(double radius, const cv::Vec3d& center, const cv::Vec3b& colorRGB, double specular) :
-        radius(radius), center(center), color(colorRGB), specular(specular) {
+    Sphere(double radius, const cv::Vec3d& center, const cv::Vec3b& colorRGB, double specular, double reflective) :
+        radius(radius), center(center), color(colorRGB), specular(specular), reflective(reflective) {
     };
 };
 
